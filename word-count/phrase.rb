@@ -4,7 +4,6 @@ class Phrase
 
   def initialize(text)
     @text = text
-    @frequency = Hash.new(0)
   end
 
   def word_count
@@ -14,11 +13,10 @@ class Phrase
   private
 
   def generate_histogram
-    text.scan(word_definition).each do |word|
-      frequency[word.downcase] += 1
+    text.scan(word_definition).reduce(Hash.new(0)) do |freq, word|
+      freq[word.downcase] += 1
+      freq
     end
-
-    frequency
   end
 
   def word_definition
