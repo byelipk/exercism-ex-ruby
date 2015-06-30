@@ -21,12 +21,15 @@ class SpaceAge
 
   SOLAR_SYSTEM.each_pair do |planet, orbital_period|
     define_method "on_#{planet}" do
-      earth_years = calculate_earth_years_for(orbital_period)
-      (seconds / earth_years).round(2)
+      (seconds / earth_years(orbital_period)).round(2)
     end
   end
 
   private
+
+  def earth_years(p)
+    calculate_earth_years_for(p)
+  end
 
   def calculate_earth_years_for(orbital_period)
     SECONDS_IN_EARTH_YEAR * orbital_period
