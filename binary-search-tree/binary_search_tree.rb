@@ -1,8 +1,7 @@
-require 'pry'
 
 class Bst
   def self.new(d)
-    Node.new(store: NonEmptyStore.new(d))
+    Node.new( store: NonEmptyStore.new(d) )
   end
 end
 
@@ -20,6 +19,12 @@ class NonEmptyStore
 end
 
 ############################################################
+
+class EmptyInserter
+  def insert(value)
+    false
+  end
+end
 
 class DefaultInserter
 
@@ -64,24 +69,37 @@ end
 
 ############################################################
 
+class DefaultEnumerator
+  def each(node, &block)
+    node.left.each(&block)
+    block.call(node.data)
+    node.right.each(&block)
+  end
+end
 
+class EmptyEnumerator
+  def each(&block)
+    return
+  end
+end
+
+############################################################
 class Node
 
   include Enumerable
 
-  attr_reader :data, :inserter, :store
+  attr_reader :data, :inserter, :enumerator
   attr_accessor :left, :right
 
   def initialize( store: EmptyStore.new,
                   inserter: DefaultInserter.new,
-                  left: EmptyNode.new,
-                  right: EmptyNode.new )
+                  enumerator: DefaultEnumerator.new )
 
-    @store    = store
-    @data     = store.data
-    @inserter = inserter
-    @left     = left
-    @right    = right
+    @data       = store.data
+    @inserter   = inserter
+    @enumerator = enumerator
+    @left       = EmptyNode.new
+    @right      = EmptyNode.new
   end
 
   def insert(value)
@@ -89,9 +107,7 @@ class Node
   end
 
   def each(&block)
-    left.each(&block)
-    block.call(self.data)
-    right.each(&block)
+    enumerator.each(self, &block)
   end
 
 end
@@ -103,10 +119,11 @@ class EmptyNode
   attr_reader :data
 
   def insert(value)
-    false
+    EmptyInserter.new.insert(value)
   end
 
   def each(&block)
-    return
+    EmptyEnumerator.new.each(&block)
   end
+
 end
