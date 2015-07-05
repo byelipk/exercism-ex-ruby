@@ -67,7 +67,7 @@ end
 
 class Node
 
-  # include Enumerable
+  include Enumerable
 
   attr_reader :data, :inserter, :store
   attr_accessor :left, :right
@@ -84,28 +84,29 @@ class Node
     @right    = right
   end
 
-  def insert(v)
-    inserter.insert(self, v)
+  def insert(value)
+    inserter.insert(self, value)
   end
 
-  # def each(&block)
-    # left.each(&block)
-    # block.call(self)
-    # right.each(&block)
-  # end
+  def each(&block)
+    left.each(&block)
+    block.call(self.data)
+    right.each(&block)
+  end
+
 end
 
 class EmptyNode
 
-  # include Enumerable
+  include Enumerable
 
   attr_reader :data
 
-  # def each(&block)
-    # return
-  # end
-
   def insert(value)
     false
+  end
+
+  def each(&block)
+    return
   end
 end
