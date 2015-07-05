@@ -1,70 +1,111 @@
-# require 'pry'
-#
-# class DefaultAttacher
-#   def attach(branch, leaf)
-#     if branch.data >= leaf.data
-#       branch.left = leaf
-#     else
-#       branch.right = leaf
-#     end
-#
-#     branch
-#   end
-# end
-#
-# class Bst
-#   def self.new(number)
-#     NonEmpty.new(number)
-#   end
-# end
-#
-# class NonEmpty
-#
-#   attr_reader :data, :attacher
-#   attr_accessor :left, :right
-#
-#   def initialize( data,
-#                   left: Empty.new,
-#                   right: Empty.new,
-#                   attacher: DefaultAttacher.new )
-#
-#     @data     = data
-#     @left     = left
-#     @right    = right
-#     @attacher = attacher
-#   end
-#
-#   def contains(number)
-#     if number < data
-#       left.contains(number)
-#     elsif number > data
-#       right.contains(number)
-#     else
-#       true
-#     end
-#   end
-#
-#   def insert(number)
-#     attacher.attach( self,
-#                      NonEmpty.new(
-#                       number,
-#                       attacher: attacher ))
-#   end
-# end
-#
-# class Empty
-#
-#   def contains
-#     false
-#   end
-#
-#   def data
-#   end
-#
-#   def insert(number)
-#     attacher.attach( self,
-#                      NonEmpty.new(
-#                       number,
-#                       attacher: attacher ))
-#   end
-# end
+require 'pry'
+
+class Bst
+  def self.new(d)
+    Node.new(store: NonEmptyStore.new(d))
+  end
+end
+
+############################################################
+
+class EmptyStore
+  attr_reader :data
+end
+
+class NonEmptyStore
+  attr_reader :data
+  def initialize(data)
+    @data = data
+  end
+end
+
+############################################################
+
+class DefaultInserter
+
+  attr_reader :direction
+
+  def insert(node, value)
+    initialize_direction(node, value) do
+      direction.push(node, value)
+    end
+  end
+
+  private
+
+  def initialize_direction(node, value)
+    @direction = case node.data <=> value
+    when 1  then LeftSide.new
+    when -1 then RightSide.new
+    when 0  then DefaultSide.new
+    end
+
+    yield
+  end
+end
+
+class LeftSide
+  def push(node, value)
+    node.left.insert(value) || node.left = Node.new(store: NonEmptyStore.new(value))
+  end
+end
+
+class RightSide
+  def push(node, value)
+    node.right.insert(value) || node.right = Node.new(store: NonEmptyStore.new(value))
+  end
+end
+
+class DefaultSide
+  def push(node, value)
+    false
+  end
+end
+
+############################################################
+
+
+class Node
+
+  # include Enumerable
+
+  attr_reader :data, :inserter, :store
+  attr_accessor :left, :right
+
+  def initialize( store: EmptyStore.new,
+                  inserter: DefaultInserter.new,
+                  left: EmptyNode.new,
+                  right: EmptyNode.new )
+
+    @store    = store
+    @data     = store.data
+    @inserter = inserter
+    @left     = left
+    @right    = right
+  end
+
+  def insert(v)
+    inserter.insert(self, v)
+  end
+
+  # def each(&block)
+    # left.each(&block)
+    # block.call(self)
+    # right.each(&block)
+  # end
+end
+
+class EmptyNode
+
+  # include Enumerable
+
+  attr_reader :data
+
+  # def each(&block)
+    # return
+  # end
+
+  def insert(value)
+    false
+  end
+end
