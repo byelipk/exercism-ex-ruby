@@ -1,4 +1,3 @@
-require 'pry'
 class Crypto
   def self.new(text)
     Square.new(raw: text)
@@ -35,7 +34,7 @@ class Square
   end
 
   def ciphertext
-    transposed_text.join('').strip
+    transposed_text.join('')
   end
 
   def normalize_ciphertext
@@ -81,12 +80,12 @@ class DefaultCipher
   def derive(segments)
     text = []
     0.upto(segments.size) do |i|
-      crypto = []
+      batch = []
       segments.each do |word|
-        crypto << word[i]
+        batch << word[i]
       end
 
-      text << crypto.join('').split
+      text << batch.join('')
     end
 
     text
